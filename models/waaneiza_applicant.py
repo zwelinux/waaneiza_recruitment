@@ -292,9 +292,25 @@ class WaaneizaApplicant(models.Model):
         tracking=True,
     )
 
+    application_status = fields.Selection([
+        ('ongoing', 'Ongoing'),
+        ('hired', 'Hired'),
+        ('refused', 'Refused'),
+    ], compute="_compute_application_status")
+
     # ======================
     # METHODS
     # ======================
+
+    @api.depends('refuse_reason_id')
+    def _compute_application_status(self):
+        for applicant in self:
+            if applicant.refuse_reason_id:
+                applicant.application_status = 'refused'
+            elif applicant.stage_id.hired_stage:
+                applicant.application_status = 'hired'
+            else:
+                applicant.application_status = 'ongoing'
 
     @api.model
     def _read_group_stage_ids(self, stages, domain, order):
@@ -506,7 +522,7 @@ class WaaneizaApplicant(models.Model):
             "email": self.partner_email or False,
             "mobile": self.partner_phone or False,
             "street": self.present_address or False,
-            "function": self.job_id or False,
+            "function": self.job_id.name or False,
         }
 
         if partner:
