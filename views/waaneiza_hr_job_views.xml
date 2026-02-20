@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- KANBAN VIEW -->
+    <record id="view_waaneiza_job_kanban" model="ir.ui.view">
+        <field name="name">waaneiza.job.kanban</field>
+        <field name="model">waaneiza.job</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column" sample="1">
+                <field name="name"/>
+                <field name="company_id"/>
+                <field name="recruiter_id"/>
+                <field name="no_of_recruitment"/>
+                <field name="application_count"/>
+                <field name="new_application_count"/>
+                <field name="website_published"/>
+                <field name="job_page_url"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="o_kanban_card oe_kanban_global_click">
+
+<!--                            <t t-if="record.website_published.raw_value">-->
+<!--                            <div class="o_kanban_ribbon o_kanban_ribbon_success">-->
+<!--                                <span>PUBLISHED</span>-->
+<!--                            </div>-->
+<!--                            </t>-->
+
+                            <!-- Header -->
+                            <div class="o_kanban_card_header">
+                                <div class="o_kanban_record_title">
+                                    <strong><field name="name"/></strong>
+                                </div>
+                            </div>
+
+                            <div class="text-muted mt4">
+                                <div>
+                                    <i class="fa fa-user me-1"/><field name="recruiter_id"/>
+                                </div>
+                                <div>
+                                    <i class="fa fa-building-o me-1"/><field name="company_id"/>
+                                </div>
+                            </div>
+
+                            <!-- Middle content -->
+                            <div class="mt16 d-flex justify-content-between align-items-center">
+                                <!-- left badge -->
+                                <div>
+                                    <button class="btn btn-primary" name="action_open_new_applications" type="object">
+                                        <field name="new_application_count"/> New Applications
+                                    </button>
+                                </div>
+
+                                <!-- right stats -->
+                                <div class="text-end">
+                                    <div class="fw-bold">
+                                        <t t-esc="record.no_of_recruitment.raw_value or 0"/> To Recruit
+                                    </div>
+                                    <div class="text-muted">
+                                        <a type="object" name="action_open_applications" class="text-muted">
+                                            <t t-esc="record.application_count.raw_value or 0"/> Applications
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="mt16 pt12 border-top d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <field name="website_published" widget="boolean_toggle"/>
+                                    <t t-if="record.website_published.raw_value">
+                                        <span class="text-muted">Published</span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="text-muted">Not published</span>
+                                    </t>
+                                </div>
+
+                                <div class="text-end">
+                                    <t t-if="record.job_page_url.raw_value">
+                                        <a t-att-href="record.job_page_url.raw_value" target="_blank">
+                                            <i class="fa fa-external-link me-1"/> Job Page
+                                        </a>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="text-muted">
+                                            <i class="fa fa-external-link me-1"/> Job Page
+                                        </span>
+                                    </t>
+                                </div>
+                            </div>
+
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+
+    <!-- LIST VIEW -->
+    <record id="view_waaneiza_job_tree" model="ir.ui.view">
+        <field name="name">waaneiza.job.tree</field>
+        <field name="model">waaneiza.job</field>
+        <field name="arch" type="xml">
+            <tree string="Job Positions">
+                <field name="name"/>
+                <field name="department_id"/>
+                <field name="application_count"/>
+                <field name="no_of_recruitment"/>
+                <field name="website_published"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_waaneiza_job_form" model="ir.ui.view">
+        <field name="name">waaneiza.job.form</field>
+        <field name="model">waaneiza.job</field>
+        <field name="arch" type="xml">
+            <form string="Job Position">
+                <sheet>
+
+                    <!-- Smart buttons bar-->
+                <div class="oe_button_box" name="button_box">
+
+                    <button type="object" name="action_open_applications" class="oe_stat_button" icon="fa-pencil">
+                        <field name="application_count" widget="statinfo" string="Job Applications"/>
+                    </button>
+
+                    <button type="object" name="action_open_attachments" class="oe_stat_button" icon="fa-file-text-o">
+                        <field name="document_count" widget="statinfo" string="Documents"/>
+                    </button>
+
+                </div>
+
+                    <!-- Title area like Recruitment -->
+                    <div class="oe_title">
+                        <span class="o_form_label">Job Position</span>
+                        <h1>
+                            <field name="name" placeholder="Job Position"/>
+                        </h1>
+                    </div>
+
+                    <notebook>
+
+                        <!-- Tab 1: Recruitment (like screenshot) -->
+                        <page string="Recruitment">
+                            <group>
+                                <!-- Left column -->
+                                <group>
+                                    <field name="department_id"/>
+                                    <field name="company_id"/>
+                                    <field name="employment_type"/>
+                                    <field name="recruiter_id"/>
+                                </group>
+
+                                <!-- Right column -->
+
+                                <group>
+
+                                    <label for="no_of_recruitment"/>
+                                    <div class="o_row" name="recruitment_target">
+                                        <field name="no_of_recruitment" class="o_hr_narrow_field"/>
+                                        <span>new Employees</span>
+                                    </div>
+
+                                    <field name="website_published" string="Is Published"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Tab 2: Job Summary (like screenshot) -->
+                        <page string="Job Summary">
+                            <group>
+                                <field name="description" nolabel="1" placeholder="Job summary..."/>
+                            </group>
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+
+            </form>
+        </field>
+    </record>
+
+
+    <!-- ACTION -->
+    <record id="action_by_job_positions" model="ir.actions.act_window">
+        <field name="name">Job Positions</field>
+        <field name="res_model">waaneiza.job</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="views" eval="[
+            (ref('waaneiza_recruitment.view_waaneiza_job_kanban'), 'kanban'),
+            (ref('waaneiza_recruitment.view_waaneiza_job_tree'), 'tree'),
+            (ref('waaneiza_recruitment.view_waaneiza_job_form'), 'form')
+        ]"/>
+    </record>
+
+
+
+</odoo>

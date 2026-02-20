@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_waaneiza_job,waaneiza.job,model_waaneiza_job,,1,1,1,1
+access_waaneiza_applicant,waaneiza.applicant,model_waaneiza_applicant,,1,1,1,1
+access_waaneiza_applicant_stage,waaneiza.applicant.stage,model_waaneiza_applicant_stage,,1,1,1,1
+access_waaneiza_applicant_refuse_wizard,waaneiza.applicant.refuse.wizard,model_waaneiza_applicant_refuse_wizard,,1,1,1,1
+access_waaneiza_applicant_certificate,waaneiza.applicant.certificate,model_waaneiza_applicant_certificate,,1,1,1,1

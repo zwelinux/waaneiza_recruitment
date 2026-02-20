@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Root menu -->
+    <menuitem
+        id="menu_recruitment"
+        name="Waaneiza Recruitment"/>
+
+    <!-- Level 2 menu -->
+    <menuitem
+        id="menu_applications"
+        name="Applications"
+        parent="menu_recruitment"/>
+
+    <!-- Level 3 menu -->
+    <menuitem
+        id="menu_by_job_positions"
+        name="By Job Positions"
+        parent="menu_applications"
+        action="action_by_job_positions"/>
+
+    <menuitem
+        id="menu_all_applications"
+        name="All Applications"
+        parent="menu_applications"
+        action="action_waaneiza_applicant"/>
+
+        <!-- Configuration menu -->
+    <menuitem id="menu_waaneiza_recruitment_config"
+              name="Configuration"
+              parent="menu_recruitment"
+              sequence="90"/>
+    <menuitem id="menu_waaneiza_recruitment_config_jobs"
+              name="Job Positions" parent="menu_waaneiza_recruitment_config"/>
+
+    <menuitem id="menu_waaneiza_recruitment_stages"
+              name="Stages"
+              parent="menu_waaneiza_recruitment_config_jobs"
+              action="action_waaneiza_applicant_stages"
+              sequence="10"/>
+    <menuitem id="menu_hr_recruitment_contract_type"
+            action="hr.hr_contract_type_action"
+            parent="menu_waaneiza_recruitment_config_jobs"
+            sequence="2"/>
+    <menuitem id="menu_waaneiza_recruitment_config_applications"
+              name="Applications" parent="menu_waaneiza_recruitment_config"/>
+
+    <menuitem id="menu_waaneiza_recruitment_degree"
+              name="Degree"
+              parent="menu_waaneiza_recruitment_config_applications"
+              action="hr_recruitment.hr_recruitment_degree_action"
+              sequence="20"/>
+    <menuitem id="menu_waaneiza_recruitment_refuse_reasons"
+              name="Refuse Reasons"
+              parent="menu_waaneiza_recruitment_config_applications"
+              action="hr_recruitment.hr_applicant_refuse_reason_action"
+              sequence="21"/>
+
+
+</odoo>

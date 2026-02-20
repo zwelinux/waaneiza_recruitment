@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <!-- KANBAN VIEW -->
+    <record id="view_waaneiza_applicant_kanban" model="ir.ui.view">
+        <field name="name">waaneiza.applicant.kanban</field>
+        <field name="model">waaneiza.applicant</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column" default_group_by="stage_id" sample="1">
+                <field name="partner_name"/>
+                <field name="job_id"/>
+                <field name="stage_id"/>
+                <field name="priority"/>
+                <field name="activity_ids"/>
+                <field name="partner_phone"/>
+                <field name="user_id"/>
+                <field name="message_attachment_count"/>
+                <field name="kanban_state"/>
+                <progressbar field="kanban_state" colors='{"done": "success", "blocked": "danger"}'/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <!--                        <t t-log="record"/>-->
+
+                        <div class="oe_kanban_card oe_kanban_global_click oe_applicant_kanban oe_semantic_html_override">
+
+                            <t t-if="record.website_published and record.website_published.raw_value">
+                                <div class="o_kanban_ribbon o_kanban_ribbon_success">
+                                    <span>PUBLISHED</span>
+                                </div>
+                            </t>
+                            <!-- Title -->
+                            <div class="o_kanban_record_title">
+                                <strong>
+                                    <field name="partner_name"/>
+                                </strong>
+                            </div>
+
+                            <!-- Job -->
+                            <div class="text-muted mt4">
+                                <field name="job_id"/>
+                            </div>
+
+                            <!-- Tags -->
+                            <!--                            <div class="mt8">-->
+                            <!--                                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>-->
+                            <!--                            </div>-->
+
+                            <!-- Phone row -->
+                            <div class="mt8 d-flex align-items-center gap-2">
+                                <t t-if="record.partner_phone.raw_value">
+                                    <i class="fa fa-mobile"/>
+                                    <span><field name="partner_phone"/></span>
+                                </t>
+                            </div>
+
+                            <div class="o_kanban_record_bottom mt4">
+                                <div class="oe_kanban_bottom_left">
+                                    <div class="float-start mr4" groups="base.group_user">
+                                        <field name="priority" widget="priority"/>
+                                    </div>
+                                    <div class="o_kanban_inline_block mr8">
+                                        <field name="activity_ids" widget="kanban_activity"/>
+                                    </div>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <a type="object" name="action_open_attachments" title="Documents"
+                                       class="o_kanban_inline_block">
+                                        <span title='Documents'><i class='fa fa-paperclip' role="img"
+                                                                   aria-label="Documents"/>
+                                            <t t-esc="record.message_attachment_count.raw_value"/>
+                                        </span>
+                                    </a>
+                                    <field name="kanban_state" widget="state_selection"/>
+                                    <field name="user_id" widget="many2one_avatar_user"/>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+
+    <!-- LIST VIEW -->
+    <record id="view_waaneiza_applicant_tree" model="ir.ui.view">
+        <field name="name">waaneiza.applicant.tree</field>
+        <field name="model">waaneiza.applicant</field>
+        <field name="arch" type="xml">
+            <tree string="Job Positions" decoration-danger="refuse_reason_id">
+                <field name="partner_name"/>
+                <field name="create_date"/>
+                <field name="job_id"/>
+                <field name="name"/>
+                <field name="stage_id"/>
+                <field name="priority" widget="priority"/>
+                <field name="partner_phone"/>
+                <field name="partner_nrc_no" optional="hide"/>
+                <field name="partner_email" optional="hide"/>
+                <field name="partner_phone" optional="hide"/>
+                <field name="refuse_reason_id" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_waaneiza_applicant_form" model="ir.ui.view">
+        <field name="name">waaneiza.applicant.form</field>
+        <field name="model">waaneiza.applicant</field>
+        <field name="arch" type="xml">
+            <form string="Applications">
+                <field name="is_hired_stage" invisible="1"/>
+
+                <!-- HEADER -->
+                <header>
+                    <button name="action_create_employee"
+                            type="object"
+                            string="Create Employee"
+                            class="btn-secondary"
+                            invisible="not is_hired_stage "
+                    />
+
+                    <button name="action_refuse"
+                            type="object"
+                            string="Refuse"
+                            class="btn-secondary"
+                            invisible="not active" data-hotkey="d"
+                    />
+                    <button string="Restore" name="toggle_active" type="object" invisible="active" data-hotkey="x"/>
+
+                    <!-- Statusbar -->
+                    <field name="stage_id"
+                           widget="statusbar"
+                           options="{'clickable': true}"
+                    />
+                </header>
+
+                <sheet>
+                    <field name="active" invisible="1"/>
+                    <field name="is_hired_stage" invisible="1"/>
+
+
+                    <!-- TITLE -->
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Sales Manager 2 year experience"/>
+                        </h1>
+                    </div>
+
+                    <!-- MAIN BODY -->
+                    <group>
+                        <!-- LEFT -->
+                        <group string="Private Contact">
+                            <field name="partner_name" placeholder="e.g. John Doe"/>
+                            <field name="partner_email" placeholder="johndoe@gmai.com"/>
+                            <field name="partner_phone" placeholder="xxxxxx"/>
+                            <field name="present_address"/>
+
+                            <!--                            <label for="street" string="Address"/>-->
+                            <!--                            <div class="o_address_format">-->
+                            <!--                                <field name="street" placeholder="Street..." nolabel="1"/>-->
+                            <!--                                <field name="street2" placeholder="Street 2..." nolabel="1"/>-->
+
+                            <!--                                <div class="o_row">-->
+                            <!--                                    <field name="city" placeholder="City" nolabel="1"/>-->
+                            <!--                                    <field name="state_id" placeholder="State" nolabel="1"-->
+                            <!--                                           domain="[('country_id','=',country_id)]"/>-->
+                            <!--                                    <field name="zip" placeholder="ZIP" nolabel="1"/>-->
+                            <!--                                </div>-->
+
+                            <!--                                <field name="country_id" placeholder="Country" nolabel="1"/>-->
+                            <!--                            </div>-->
+                        </group>
+
+                        <!-- RIGHT -->
+                        <group string="Interviewer">
+                            <field name="interviewer_ids" widget="many2many_tags"/>
+                            <field name="user_id"/>
+                            <field name="priority" widget="priority"/>
+                        </group>
+                    </group>
+
+                    <group col="3">
+                        <group string="Citizenship">
+                            <field name="nationality"/>
+                            <field name="race"/>
+                            <field name="religion"/>
+                            <field name="partner_nrc_no" placeholder="1/TaTaKa(N)123456"/>
+                            <field name="gender"/>
+                            <field name="place_of_birth"/>
+                            <field name="date_of_birth"/>
+                        </group>
+                        <group string="appearance and structure">
+                            <field name="age"/>
+                            <field name="weight"/>
+                            <field name="height"/>
+                        </group>
+                        <group string="Marital Status">
+                            <field name="marital"/>
+                            <field name="spouse_complete_name" invisible="marital not in ['married', 'cohabitant']"/>
+                            <field name="spouse_birthdate" invisible="marital not in ['married', 'cohabitant']"/>
+                            <field name="children"/>
+                        </group>
+                    </group>
+
+                    <group string="family" col="3">
+                        <group string="Father">
+                            <field name="father_name"/>
+                            <field name="father_address"/>
+                            <field name="father_job"/>
+                            <field name="father_phone"/>
+                        </group>
+                        <group string="mother">
+                            <field name="mother_name"/>
+                            <field name="mother_address"/>
+                            <field name="mother_job"/>
+                            <field name="mother_phone"/>
+                        </group>
+                        <group string="sibling">
+                            <field name="sibling_name"/>
+                            <field name="sibling_address"/>
+                            <field name="sibling_job"/>
+                            <field name="sibling_phone"/>
+                        </group>
+                    </group>
+                    <!--                    EDUCATION-->
+                    <separator string="Education"/>
+                    <group>
+                        <group>
+                            <field name="academic_education"/>
+                            <field name="professional_education"/>
+                            <field name="language"/>
+                            <field name="career"/>
+                        </group>
+                        <group></group>
+
+                    </group>
+
+                    <!--                    JOB-->
+                    <separator string="JOB"/>
+                    <group>
+                        <group>
+                            <field name="job_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="employment_type"/>
+                        </group>
+                        <group>
+                            <field name="salary_expected"/>
+                            <field name="salary_proposed"/>
+                        </group>
+                    </group>
+                    <!--                    Ability-->
+                    <separator string="Ability / Availability"/>
+                    <group col="2">
+                        <group>
+                            <field name="available_from" placeholder="e.g. Immediately / 5 years ago"/>
+                            <field name="seriously_ill_or_contagious"/>
+                            <field name="can_drive_car"/>
+                            <field name="can_drive_motorcycle"/>
+                        </group>
+                        <group>
+                            <field name="has_driving_licence"/>
+                            <field name="can_travel"/>
+                            <field name="applied_before"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <field name="further_information"
+                               placeholder="Please provide any further information about yourself..."/>
+                    </group>
+
+                    <separator string="Documents"/>
+
+                    <group col="2">
+
+                        <group string="Identity Documents">
+                            <field name="passport_photo_link" widget="url"/>
+                            <field name="nrc_front_link" widget="url"/>
+                            <field name="nrc_back_link" widget="url"/>
+                            <field name="census_front_link" widget="url"/>
+                            <field name="census_back_link" widget="url"/>
+                        </group>
+
+                        <group string="Education &amp; Licenses">
+                            <field name="degree_photo_link" widget="url"/>
+                            <!-- <field name="certificate_links"/> -->
+                            <field name="certificate_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="link" widget="url"/>
+                                </tree>
+                            </field>
+                            <field name="driving_license_front_link" widget="url"/>
+                            <field name="driving_license_back_link" widget="url"/>
+                        </group>
+
+                    </group>
+                    <!-- NOTES -->
+                    <notebook>
+                        <page string="Notes">
+                            <field name="description" nolabel="1"/>
+                        </page>
+                        <page string="Exam Results">
+                            <group col="2">
+                                <group string="English Test">
+                                    <field name="english_test_passed"/>
+                                    <field name="english_test_points"/>
+                                    <field name="english_test_rating"/>
+                                </group>
+
+                                <group string="CE Test">
+                                    <field name="ce_test_passed"/>
+                                    <field name="ce_test_points"/>
+                                    <field name="ce_test_rating"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+
+
+                </sheet>
+
+                <!-- CHATTER -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+
+            </form>
+        </field>
+    </record>
+    <!-- SEARCH VIEW -->
+    <record id="view_waaneiza_applicant_search" model="ir.ui.view">
+        <field name="name">waaneiza.applicant.search</field>
+        <field name="model">waaneiza.applicant</field>
+        <field name="arch" type="xml">
+            <search string="Applications">
+                <field name="partner_name"/>
+                <field name="job_id"/>
+                <field name="company_id"/>
+                <field name="is_hired_stage"/>
+                <field name="refuse_reason_id"/>
+                <field name="partner_nrc_no"/>
+                <field name="partner_email"/>
+                <separator/>
+
+                <!-- Filters dropdown ထဲမှာ ပေါ်ချင်တာတွေ -->
+                <filter string="Unassigned" name="unassigned" domain="[('user_id','=',False)]"/>
+                <filter string="My Applications" name="my_applications" domain="[('user_id','=',uid)]"/>
+                <filter string="Hired" name="is_hired_stage" domain="[('stage_id.hired_stage','=',True)]"/>
+                <filter string="Refused" name="refused"
+                        domain="['|',('active','=',False), ('refuse_reason_id', '!=', False)]"/>
+                <filter
+                        string="Duplicate NRC"
+                        name="filter_dup_nrc"
+                        domain="[('is_duplicate_nrc','=',True)]"/>
+
+                <filter
+                        string="Duplicate Email"
+                        name="filter_dup_email"
+                        domain="[('is_duplicate_email','=',True)]"/>
+
+
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Job" name="job" domain="[]" context="{'group_by': 'job_id'}"/>
+                    <filter string="Stage" name="stage" domain="[]" context="{'group_by': 'stage_id'}"/>
+                    <filter string="Responsible" name="responsible" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Creation Date" name="creation_date" context="{'group_by': 'create_date'}"/>
+                    <filter string="Refuse Reason" name="refuse_reason_id" domain="[]"
+                            context="{'group_by': 'refuse_reason_id'}"/>
+                    <filter string="Company" name="company" context="{'group_by':'company_id'}"
+                            groups="base.group_multi_company"/>
+                    <filter string="Email" name="email" domain="[]" context="{'group_by': 'partner_email'}"/>
+                    <filter string="NRC" name="nrc" domain="[]" context="{'group_by': 'partner_nrc_no'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <!-- ACTION -->
+    <record id="action_waaneiza_applicant" model="ir.actions.act_window">
+        <field name="name">Applications</field>
+        <field name="res_model">waaneiza.applicant</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="views" eval="[
+        (ref('waaneiza_recruitment.view_waaneiza_applicant_kanban'), 'kanban'),
+        (ref('waaneiza_recruitment.view_waaneiza_applicant_tree'), 'tree'),
+        (ref('waaneiza_recruitment.view_waaneiza_applicant_form'), 'form')
+    ]"/>
+        <field name="search_view_id" ref="waaneiza_recruitment.view_waaneiza_applicant_search"/>
+        <field name="context">{'search_default_stage': 1}</field>
+    </record>
+
+
+</odoo>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_waaneiza_applicant_stage_tree" model="ir.ui.view">
+        <field name="name">waaneiza.applicant.stage.tree</field>
+        <field name="model">waaneiza.applicant.stage</field>
+        <field name="arch" type="xml">
+            <tree string="Stages">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="fold"/>
+                <field name="hired_stage"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_waaneiza_applicant_stage_form" model="ir.ui.view">
+        <field name="name">waaneiza.applicant.stage.form</field>
+        <field name="model">waaneiza.applicant.stage</field>
+        <field name="arch" type="xml">
+            <form string="Stages">
+                <sheet>
+
+                    <group string="Stage Definition">
+                        <group>
+                            <field name="name"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="fold"/>
+                            <field name="hired_stage"/>
+                        </group>
+                    </group>
+
+                    <separator string="Tooltips"/>
+
+                    <div class="o_form_label">
+                        You can define here the labels that will be displayed for the kanban state instead of the default labels.
+                    </div>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_waaneiza_applicant_stages" model="ir.actions.act_window">
+        <field name="name">Stages</field>
+        <field name="res_model">waaneiza.applicant.stage</field>
+        <field name="view_mode">tree,form</field>
+        <field name="views" eval="[
+            (ref('waaneiza_recruitment.view_waaneiza_applicant_stage_tree'), 'tree'),
+            (ref('waaneiza_recruitment.view_waaneiza_applicant_stage_form'), 'form')
+        ]"/>
+    </record>
+
+
+
+</odoo>
