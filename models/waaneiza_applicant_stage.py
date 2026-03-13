@@ -9,3 +9,4 @@ class WaaneizaApplicantStage(models.Model):
     sequence = fields.Integer(default=0)
     fold = fields.Boolean(string="Folded in Kanban")
     hired_stage = fields.Boolean(string="Hired Stage")
+    passed_stage = fields.Boolean(string="Passed Stage")
