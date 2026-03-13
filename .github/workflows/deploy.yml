@@ -26,6 +26,10 @@ jobs:
             git fetch origin
             git reset --hard origin/main
 
+            # clear python cache
+            find /opt/odoo -name "*.pyc" -delete
+            find /opt/odoo -name "__pycache__" -type d -exec rm -rf {} +
+
             sudo -u odoo /opt/odoo/odoo/odoo-bin \
             -d testing2 \
             -u waaneiza_recruitment \
