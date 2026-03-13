@@ -135,7 +135,7 @@
 
                 </div>
 
-                    <!-- Title area like Recruitment -->
+                    <!-- Title area -->
                     <div class="oe_title">
                         <span class="o_form_label">Job Position</span>
                         <h1>
@@ -145,7 +145,7 @@
 
                     <notebook>
 
-                        <!-- Tab 1: Recruitment (like screenshot) -->
+                        <!-- Tab 1: Recruitment  -->
                         <page string="Recruitment">
                             <group>
                                 <!-- Left column -->
@@ -171,7 +171,7 @@
                             </group>
                         </page>
 
-                        <!-- Tab 2: Job Summary (like screenshot) -->
+                        <!-- Tab 2: Job Summary-->
                         <page string="Job Summary">
                             <group>
                                 <field name="description" nolabel="1" placeholder="Job summary..."/>

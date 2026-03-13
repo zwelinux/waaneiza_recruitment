@@ -125,6 +125,11 @@ class WaaneizaApplicant(models.Model):
         "res.users",
         string="Interviewers",
     )
+    is_sent_to_interviewer = fields.Boolean(default=False, tracking=True)
+    interview_result = fields.Selection([
+        ('passed', 'Passed'),
+        ('failed', 'Failed'),
+    ], string="Interview Result", tracking=True)
 
     priority = fields.Selection(
         [
@@ -216,7 +221,11 @@ class WaaneizaApplicant(models.Model):
         store=True,
         string="Is Hired Stage",
     )
-
+    is_passed_stage = fields.Boolean(
+        related="stage_id.passed_stage",
+        store=True,
+        string="Is Passed Stage",
+    )
     kanban_state = fields.Selection([
         ('normal', 'Grey'),
         ('done', 'Green'),
@@ -235,7 +244,7 @@ class WaaneizaApplicant(models.Model):
     # ======================
     # NOTES
     # ======================
-    description = fields.Text(string="Notes")
+    description = fields.Text(string="Notes",tracking=True)
 
     # ======================
     # DOCUMENT LINKS (UPLOAD LINKS)
@@ -294,23 +303,87 @@ class WaaneizaApplicant(models.Model):
 
     application_status = fields.Selection([
         ('ongoing', 'Ongoing'),
+        ('exam_passed', 'Exam Passed'),
+        ('interview_passed', 'Interview Passed'),
+        ('interview_fail', 'Interview Fail'),
         ('hired', 'Hired'),
         ('refused', 'Refused'),
-    ], compute="_compute_application_status")
+    ], compute="_compute_application_status", store=True)
 
     # ======================
     # METHODS
     # ======================
 
-    @api.depends('refuse_reason_id')
+    @api.depends('refuse_reason_id', 'stage_id', 'stage_id.hired_stage', 'stage_id.passed_stage', 'interview_result')
     def _compute_application_status(self):
         for applicant in self:
             if applicant.refuse_reason_id:
                 applicant.application_status = 'refused'
             elif applicant.stage_id.hired_stage:
                 applicant.application_status = 'hired'
+            elif applicant.interview_result == 'passed':
+                applicant.application_status = 'interview_passed'
+            elif applicant.interview_result == 'failed':
+                applicant.application_status = 'interview_fail'
+            elif applicant.stage_id.passed_stage:
+                applicant.application_status = 'exam_passed'
             else:
                 applicant.application_status = 'ongoing'
+
+    def action_send_to_interviewer(self):
+        interview_stage = self.env['waaneiza.applicant.stage'].search(
+            [('passed_stage', '=', True)],
+            limit=1
+        )
+
+        for rec in self:
+            if not rec.interviewer_ids:
+                raise UserError(_("Please select at least one interviewer."))
+
+            vals = {
+                'is_sent_to_interviewer': True,
+            }
+            rec.write(vals)
+
+    def action_mark_interview_passed(self):
+        for rec in self:
+            if self.env.user not in rec.interviewer_ids:
+                raise UserError(_("You are not allowed to evaluate this applicant."))
+            rec.write({
+                "interview_result": "passed",
+            })
+
+    def action_mark_interview_failed(self):
+        for rec in self:
+            if self.env.user not in rec.interviewer_ids:
+                raise UserError(_("You are not allowed to evaluate this applicant."))
+            rec.write({
+                "interview_result": "failed",
+            })
+
+    def action_confirm_next_stage(self):
+        Stage = self.env["waaneiza.applicant.stage"]
+
+        for rec in self:
+            if not rec.stage_id:
+                raise UserError(_("Please set a current stage before confirming."))
+
+            next_stage = Stage.search(
+                [
+                    "|",
+                    ("sequence", ">", rec.stage_id.sequence),
+                    "&",
+                    ("sequence", "=", rec.stage_id.sequence),
+                    ("id", ">", rec.stage_id.id),
+                ],
+                order="sequence asc, id asc",
+                limit=1,
+            )
+
+            if not next_stage:
+                raise UserError(_("This applicant is already at the final stage."))
+
+            rec.write({"stage_id": next_stage.id})
 
     @api.model
     def _read_group_stage_ids(self, stages, domain, order):

@@ -17,6 +17,7 @@
         id="menu_by_job_positions"
         name="By Job Positions"
         parent="menu_applications"
+        groups="waaneiza_recruitment.group_waaneiza_recruitment_manager"
         action="action_by_job_positions"/>
 
     <menuitem
@@ -29,6 +30,7 @@
     <menuitem id="menu_waaneiza_recruitment_config"
               name="Configuration"
               parent="menu_recruitment"
+              groups="waaneiza_recruitment.group_waaneiza_recruitment_manager"
               sequence="90"/>
     <menuitem id="menu_waaneiza_recruitment_config_jobs"
               name="Job Positions" parent="menu_waaneiza_recruitment_config"/>
@@ -55,6 +57,8 @@
               parent="menu_waaneiza_recruitment_config_applications"
               action="hr_recruitment.hr_applicant_refuse_reason_action"
               sequence="21"/>
+
+
 
 
 </odoo>

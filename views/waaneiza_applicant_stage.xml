@@ -9,6 +9,8 @@
                 <field name="name"/>
                 <field name="fold"/>
                 <field name="hired_stage"/>
+                <field name="passed_stage"/>
+
             </tree>
         </field>
     </record>
@@ -28,14 +30,16 @@
                         <group>
                             <field name="fold"/>
                             <field name="hired_stage"/>
+                            <field name="passed_stage"/>
+
                         </group>
                     </group>
 
-                    <separator string="Tooltips"/>
+<!--                    <separator string="Tooltips"/>-->
 
-                    <div class="o_form_label">
-                        You can define here the labels that will be displayed for the kanban state instead of the default labels.
-                    </div>
+<!--                    <div class="o_form_label">-->
+<!--                        You can define here the labels that will be displayed for the kanban state instead of the default labels.-->
+<!--                    </div>-->
 
                 </sheet>
             </form>
