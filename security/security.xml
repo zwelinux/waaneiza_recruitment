@@ -9,17 +9,16 @@
     </record>
 
     <!-- Security Groups -->
-    <record id="group_waaneiza_recruitment_manager" model="res.groups">
-        <field name="name">Recruitment Manager</field>
-        <field name="category_id" ref="waaneiza_recruitment.module_category_waaneiza_recruitment"/>
-        <field name="implied_ids" eval="[(4, ref('waaneiza_recruitment.group_waaneiza_interviewer'))]"/>
-    </record>
-
     <record id="group_waaneiza_interviewer" model="res.groups">
         <field name="name">Interviewer</field>
         <field name="category_id" ref="waaneiza_recruitment.module_category_waaneiza_recruitment"/>
     </record>
 
+    <record id="group_waaneiza_recruitment_manager" model="res.groups">
+        <field name="name">Recruitment Manager</field>
+        <field name="category_id" ref="waaneiza_recruitment.module_category_waaneiza_recruitment"/>
+        <field name="implied_ids" eval="[(4, ref('waaneiza_recruitment.group_waaneiza_interviewer'))]"/>
+    </record>
     <!-- Record Rule:
          Interviewer can only see applicant records
          where current user exists in interviewer_ids
@@ -29,17 +28,17 @@
         <field name="model_id" ref="model_waaneiza_applicant"/>
         <field name="groups" eval="[(4, ref('waaneiza_recruitment.group_waaneiza_interviewer'))]"/>
         <field name="domain_force">[('interviewer_ids', 'in', [user.id]), ('is_sent_to_interviewer', '=', True)]</field>
-<!--        <field name="perm_read" eval="1"/>-->
-<!--        <field name="perm_write" eval="1"/>-->
-<!--        <field name="perm_create" eval="0"/>-->
-<!--        <field name="perm_unlink" eval="0"/>-->
+        <!--        <field name="perm_read" eval="1"/>-->
+        <!--        <field name="perm_write" eval="1"/>-->
+        <!--        <field name="perm_create" eval="0"/>-->
+        <!--        <field name="perm_unlink" eval="0"/>-->
     </record>
 
     <record id="waaneiza_applicant_rule_manager" model="ir.rule">
-        <field name="name">Manager can get all access </field>
+        <field name="name">Manager can get all access</field>
         <field name="model_id" ref="model_waaneiza_applicant"/>
         <field name="groups" eval="[(4, ref('waaneiza_recruitment.group_waaneiza_recruitment_manager'))]"/>
-        <field name="domain_force">[(1, '=',1)]</field>
+        <field name="domain_force">[(1, '=', 1)]</field>
     </record>
 
 </odoo>
