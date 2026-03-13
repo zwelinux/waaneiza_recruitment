@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <record id="module_category_waaneiza_recruitment" model="ir.module.category">
         <field name="name">Waaneiza Recruitment</field>
         <field name="description">Access levels for Waaneiza recruitment features</field>
-        <field name="parent_id" ref="base.module_category_human_resources"/>
-        <field name="sequence">25</field>
     </record>
-
-    <!-- Security Groups -->
+   <!-- Security Groups -->
     <record id="group_waaneiza_interviewer" model="res.groups">
         <field name="name">Interviewer</field>
         <field name="category_id" ref="waaneiza_recruitment.module_category_waaneiza_recruitment"/>
@@ -28,10 +24,6 @@
         <field name="model_id" ref="model_waaneiza_applicant"/>
         <field name="groups" eval="[(4, ref('waaneiza_recruitment.group_waaneiza_interviewer'))]"/>
         <field name="domain_force">[('interviewer_ids', 'in', [user.id]), ('is_sent_to_interviewer', '=', True)]</field>
-        <!--        <field name="perm_read" eval="1"/>-->
-        <!--        <field name="perm_write" eval="1"/>-->
-        <!--        <field name="perm_create" eval="0"/>-->
-        <!--        <field name="perm_unlink" eval="0"/>-->
     </record>
 
     <record id="waaneiza_applicant_rule_manager" model="ir.rule">
