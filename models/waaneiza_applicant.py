@@ -39,14 +39,7 @@ class WaaneizaApplicant(models.Model):
     sibling_job = fields.Char(string="Sibling's Job", tracking=True)
     sibling_phone = fields.Char(string="Sibling's Phone", tracking=True)
     sibling_address = fields.Char(string="Sibling's Address", tracking=True)
-
-    # street = fields.Char(tracking=True)
-    # street2 = fields.Char(tracking=True)
-    # city = fields.Char(tracking=True)
-    # state_id = fields.Many2one("res.country.state", tracking=True)
-    # zip = fields.Char(tracking=True)
-    # country_id = fields.Many2one("res.country", tracking=True)
-
+    applied_date = fields.Datetime(string="Applied Date", tracking=True)
     gender = fields.Selection([
         ('male', 'Male'),
         ('female', 'Female'),
@@ -346,16 +339,18 @@ class WaaneizaApplicant(models.Model):
             rec.write(vals)
 
     def action_mark_interview_passed(self):
+        is_manager = self.env.user.has_group("waaneiza_recruitment.group_waaneiza_recruitment_manager")
         for rec in self:
-            if self.env.user not in rec.interviewer_ids:
+            if self.env.user not in rec.interviewer_ids and not is_manager:
                 raise UserError(_("You are not allowed to evaluate this applicant."))
             rec.write({
                 "interview_result": "passed",
             })
 
     def action_mark_interview_failed(self):
+        is_manager = self.env.user.has_group("waaneiza_recruitment.group_waaneiza_recruitment_manager")
         for rec in self:
-            if self.env.user not in rec.interviewer_ids:
+            if self.env.user not in rec.interviewer_ids and not is_manager:
                 raise UserError(_("You are not allowed to evaluate this applicant."))
             rec.write({
                 "interview_result": "failed",
@@ -468,40 +463,18 @@ class WaaneizaApplicant(models.Model):
                 "previous_stage_id": False,  # reset saved value after restore
             })
 
-    def toggle_active(self):
-        self = self.with_context(just_unarchived=True)
-        res = super(WaaneizaApplicant, self).toggle_active()
-        active_applicants = self.filtered(lambda a: a.active)
-        if active_applicants:
-            active_applicants.reset_applicant()
-        return res
+    def action_restore_refused(self):
+        self.reset_applicant()
+        return True
 
-    # @api.depends('job_id')
-    # def _compute_stage(self):
-    #     Stage = self.env['waaneiza.applicant.stage']
-    #     for applicant in self:
-    #         if not applicant.job_id:
-    #             applicant.stage_id = False
-    #             continue
-    #
-    #         stage = Stage.search([
-    #             '|',
-    #             ('job_ids', '=', False),
-    #             ('job_ids', 'in', applicant.job_id.id),
-    #             ('fold', '=', False),
-    #         ], order='sequence asc', limit=1)
-    #
-    #         applicant.stage_id = stage.id or False
+    # def toggle_active(self):
+    #     self = self.with_context(just_unarchived=True)
+    #     res = super(WaaneizaApplicant, self).toggle_active()
+    #     active_applicants = self.filtered(lambda a: a.active)
+    #     if active_applicants:
+    #         active_applicants.reset_applicant()
+    #     return res
 
-    # @api.model
-    # def create(self, vals):
-    #     if not vals.get('stage_id'):
-    #         applied_stage = self.env['waaneiza.applicant.stage'].search(
-    #             [('sequence', '=', 1)], limit=1
-    #         )
-    #         if applied_stage:
-    #             vals['stage_id'] = applied_stage.id
-    #     return super().create(vals)
 
     def action_open_attachments(self):
         return {
@@ -607,44 +580,59 @@ class WaaneizaApplicant(models.Model):
 
     is_duplicate_nrc = fields.Boolean(
         compute="_compute_duplicates",
-        store=True
+        search="_search_is_duplicate_nrc"
     )
 
     is_duplicate_email = fields.Boolean(
         compute="_compute_duplicates",
-        store=True
+        search="_search_is_duplicate_email"
     )
 
     @api.depends("partner_nrc_no", "partner_email")
     def _compute_duplicates(self):
-        # default
         for rec in self:
-            rec.is_duplicate_nrc = False
-            rec.is_duplicate_email = False
+            rec.is_duplicate_nrc = bool(
+                rec.partner_nrc_no and self.search_count([
+                    ("partner_nrc_no", "=", rec.partner_nrc_no),
+                ]) > 1
+            )
+            rec.is_duplicate_email = bool(
+                rec.partner_email and self.search_count([
+                    ("partner_email", "=", rec.partner_email),
+                ]) > 1
+            )
 
-        # compute for all records in DB (simple approach)
-        self.env.cr.execute("""
-                            SELECT partner_nrc_no
-                            FROM waaneiza_applicant
-                            WHERE partner_nrc_no IS NOT NULL
-                              AND partner_nrc_no != ''
-                            GROUP BY partner_nrc_no
-                            HAVING COUNT(*) > 1
-                            """)
-        dup_nrcs = set(r[0] for r in self.env.cr.fetchall())
+    @api.model
+    def _get_duplicate_values(self, field_name):
+        query = f"""
+            SELECT {field_name}
+            FROM waaneiza_applicant
+            WHERE {field_name} IS NOT NULL
+              AND {field_name} != ''
+            GROUP BY {field_name}
+            HAVING COUNT(*) > 1
+        """
+        self.env.cr.execute(query)
+        return [row[0] for row in self.env.cr.fetchall()]
 
-        self.env.cr.execute("""
-                            SELECT partner_email
-                            FROM waaneiza_applicant
-                            WHERE partner_email IS NOT NULL
-                              AND partner_email != ''
-                            GROUP BY partner_email
-                            HAVING COUNT(*) > 1
-                            """)
-        dup_emails = set(r[0] for r in self.env.cr.fetchall())
+    @api.model
+    def _search_is_duplicate_nrc(self, operator, value):
+        if operator not in ("=", "!=") or not isinstance(value, bool):
+            raise UserError(_("Unsupported search operator for duplicate NRC filter."))
 
-        for rec in self:
-            if rec.partner_nrc_no and rec.partner_nrc_no in dup_nrcs:
-                rec.is_duplicate_nrc = True
-            if rec.partner_email and rec.partner_email in dup_emails:
-                rec.is_duplicate_email = True
+        dup_nrcs = self._get_duplicate_values("partner_nrc_no")
+        domain = [("id", "=", 0)] if not dup_nrcs else [("partner_nrc_no", "in", dup_nrcs)]
+        if (operator == "=" and value) or (operator == "!=" and not value):
+            return domain
+        return ["!", *domain]
+
+    @api.model
+    def _search_is_duplicate_email(self, operator, value):
+        if operator not in ("=", "!=") or not isinstance(value, bool):
+            raise UserError(_("Unsupported search operator for duplicate email filter."))
+
+        dup_emails = self._get_duplicate_values("partner_email")
+        domain = [("id", "=", 0)] if not dup_emails else [("partner_email", "in", dup_emails)]
+        if (operator == "=" and value) or (operator == "!=" and not value):
+            return domain
+        return ["!", *domain]

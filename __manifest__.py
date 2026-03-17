@@ -4,8 +4,8 @@
     "category": "Human Resources",
     "depends": ["base", "hr", "hr_recruitment", "mail", ],
     "data": [
-        "security/ir.model.access.csv",
         'security/security.xml',
+        "security/ir.model.access.csv",
         "views/ir_attachment_views.xml",
         "views/waaneiza_applicant_views.xml",
         "views/waaneiza_applicant_stage.xml",

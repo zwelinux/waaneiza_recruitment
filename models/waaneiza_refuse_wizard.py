@@ -31,9 +31,7 @@ class WaaneizaApplicantRefuseWizard(models.TransientModel):
 
         applicant.write({
             "refuse_reason_id": self.refuse_reason_id.id,
-            "active": False,
         })
         return {"type": "ir.actions.act_window_close"}
-
 
 

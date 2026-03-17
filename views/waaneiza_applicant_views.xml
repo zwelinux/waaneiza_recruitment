@@ -28,7 +28,7 @@
 
                         <div class="oe_kanban_card oe_kanban_global_click oe_applicant_kanban oe_semantic_html_override">
                             <widget name="web_ribbon" title="Refused"
-                                    bg_color="text-bg-danger"
+                                    bg_color="text-bg-warning"
                                     invisible="application_status != 'refused'"/>
 
                             <widget name="web_ribbon" title="Exam Passed"
@@ -63,11 +63,6 @@
                             <div class="text-muted mt4">
                                 <field name="job_id"/>
                             </div>
-
-                            <!-- Tags -->
-                            <!--                            <div class="mt8">-->
-                            <!--                                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>-->
-                            <!--                            </div>-->
 
                             <!-- Phone row -->
                             <div class="mt8 d-flex align-items-center gap-2">
@@ -114,7 +109,7 @@
         <field name="arch" type="xml">
             <tree string="Job Positions" decoration-danger="refuse_reason_id">
                 <field name="partner_name"/>
-                <field name="create_date"/>
+                <field name="applied_date"/>
                 <field name="job_id"/>
                 <field name="name"/>
                 <field name="stage_id"/>
@@ -170,32 +165,40 @@
                             type="object"
                             string="Pass"
                             class="btn-primary"
-                            groups="waaneiza_recruitment.group_waaneiza_interviewer"
-                            invisible="not is_sent_to_interviewer or application_status == 'interview_passed' or application_status == 'interview_fail' or application_status == 'refused'"/>
+                            groups="waaneiza_recruitment.group_waaneiza_interviewer,waaneiza_recruitment.group_waaneiza_recruitment_manager"
+                            invisible="not is_sent_to_interviewer or not is_passed_stage or application_status == 'interview_passed' or application_status == 'interview_fail' or application_status == 'refused'"/>
 
                     <button name="action_mark_interview_failed"
                             type="object"
                             string="Fail"
                             class="btn-secondary"
-                            groups="waaneiza_recruitment.group_waaneiza_interviewer"
-                            invisible="not is_sent_to_interviewer or application_status == 'interview_passed' or application_status == 'interview_fail' or application_status == 'refused'"/>
+                            groups="waaneiza_recruitment.group_waaneiza_interviewer,waaneiza_recruitment.group_waaneiza_recruitment_manager"
+                            invisible="not is_sent_to_interviewer or not is_passed_stage or application_status == 'interview_passed' or application_status == 'interview_fail' or application_status == 'refused'"/>
 
                     <button name="action_confirm_next_stage"
                             type="object"
                             string="Confirm"
                             class="btn-primary"
-                            invisible="not active"
+                            invisible="application_status == 'refused'"
                             groups="waaneiza_recruitment.group_waaneiza_recruitment_manager"
                     />
                     <button name="action_refuse"
                             type="object"
                             string="Refuse"
                             class="btn-secondary"
-                            invisible="not active"
+                            invisible="application_status == 'refused'"
                             data-hotkey="d"
                             groups="waaneiza_recruitment.group_waaneiza_recruitment_manager"
                     />
-                    <button string="Restore" name="toggle_active" type="object" invisible="active" data-hotkey="x"/>
+                    <button name="action_restore_refused"
+                            type="object"
+                            string="Restore"
+                            class="btn-secondary"
+                            invisible="application_status != 'refused'"
+                            data-hotkey="x"
+                            groups="waaneiza_recruitment.group_waaneiza_recruitment_manager"
+                    />
+<!--                    <button string="Restore" name="toggle_active" type="object" invisible="active" data-hotkey="x"/>-->
 
                     <!-- Statusbar -->
                     <field name="stage_id"
@@ -212,7 +215,7 @@
                      <field name="is_sent_to_interviewer" invisible="1"/>
 
                     <widget name="web_ribbon" title="Refused"
-                            bg_color="text-bg-danger"
+                            bg_color="text-bg-warning"
                             invisible="application_status != 'refused'"/>
 
                     <widget name="web_ribbon" title="Exam Passed"
@@ -255,6 +258,7 @@
                             <field name="interviewer_ids" widget="many2many_tags"/>
                             <field name="user_id"/>
                             <field name="priority" widget="priority"/>
+                            <field name="applied_date" />
                         </group>
                     </group>
 
@@ -428,6 +432,7 @@
                 <field name="job_id"/>
                 <field name="company_id"/>
                 <field name="is_hired_stage"/>
+                <field name="application_status"/>
                 <field name="refuse_reason_id"/>
                 <field name="partner_nrc_no"/>
                 <field name="partner_email"/>
@@ -438,7 +443,7 @@
                 <filter string="My Applications" name="my_applications" domain="[('user_id','=',uid)]"/>
                 <filter string="Hired" name="is_hired_stage" domain="[('stage_id.hired_stage','=',True)]"/>
                 <filter string="Refused" name="refused"
-                        domain="['|',('active','=',False), ('refuse_reason_id', '!=', False)]"/>
+                        domain="[('application_status', '=', 'refused')]"/>
                 <filter
                         string="Duplicate NRC"
                         name="filter_dup_nrc"
