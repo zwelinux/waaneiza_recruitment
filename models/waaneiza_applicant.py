@@ -165,8 +165,8 @@ class WaaneizaApplicant(models.Model):
                                    )
 
     # English Test
-    english_test_passed = fields.Boolean(string="English Test Passed",tracking=True)
-    english_test_points = fields.Char(string="English Test Points",tracking=True)
+    english_test_passed = fields.Boolean(string="English Test Passed", tracking=True)
+    english_test_points = fields.Char(string="English Test Points", tracking=True)
     english_test_rating = fields.Selection(
         [
             ('advance', 'Advance'),
@@ -183,8 +183,8 @@ class WaaneizaApplicant(models.Model):
     )
 
     # CE Test
-    ce_test_passed = fields.Boolean(string="CE Test Passed",tracking=True)
-    ce_test_points = fields.Char(string="CE Test Points",tracking=True)
+    ce_test_passed = fields.Boolean(string="CE Test Passed", tracking=True)
+    ce_test_points = fields.Char(string="CE Test Points", tracking=True)
     ce_test_rating = fields.Selection(
         [
             ('normal_eq', 'Normal EQ'),
@@ -237,7 +237,7 @@ class WaaneizaApplicant(models.Model):
     # ======================
     # NOTES
     # ======================
-    description = fields.Text(string="Notes",tracking=True)
+    description = fields.Text(string="Notes", tracking=True)
 
     # ======================
     # DOCUMENT LINKS (UPLOAD LINKS)
@@ -399,7 +399,6 @@ class WaaneizaApplicant(models.Model):
                 "active_ids": self.ids,
             },
         }
-    
 
     def _process_certificate_links(self):
         Certificate = self.env["waaneiza.applicant.certificate"]
@@ -423,8 +422,6 @@ class WaaneizaApplicant(models.Model):
                     "link": link,
                 })
 
-
-
     @api.model
     def create(self, vals):
         if not vals.get('stage_id'):
@@ -437,7 +434,6 @@ class WaaneizaApplicant(models.Model):
         record = super().create(vals)
         record._process_certificate_links()
         return record
-
 
     def write(self, vals):
         res = super().write(vals)
@@ -475,7 +471,6 @@ class WaaneizaApplicant(models.Model):
     #         active_applicants.reset_applicant()
     #     return res
 
-
     def action_open_attachments(self):
         return {
             'type': 'ir.actions.act_window',
@@ -509,14 +504,10 @@ class WaaneizaApplicant(models.Model):
     def action_create_employee(self):
         self.ensure_one()
 
-        if self.employee_information_id:
-            raise UserError(_("Employee record already created."))
-
         partner = self._get_or_create_contact()
 
         # values (Mapping)
         vals = {
-
             "name": self.partner_name,
             "private_email": self.partner_email,
             "phone": self.partner_phone,
@@ -526,15 +517,27 @@ class WaaneizaApplicant(models.Model):
             "identification_id": self.partner_nrc_no,
             "marital": self.marital,
             "children": self.children,
-            "address_home_id": partner.id,
             "study_field": self.academic_education,
         }
 
-        # Create employee information record
-        emp = self.env["hr.employee.information"].sudo().create(vals)
+        EmployeeInfo = self.env["hr.employee.information"].sudo()
 
-        # Link back to applicant
-        self.employee_information_id = emp.id
+        # Link contact to employee if such field exists on current model definition.
+        if "address_home_id" in EmployeeInfo._fields:
+            vals["address_home_id"] = partner.id
+        elif "partner_id" in EmployeeInfo._fields:
+            vals["partner_id"] = partner.id
+
+        # Keep only fields that actually exist on hr.employee.information.
+        vals = {key: value for key, value in vals.items() if key in EmployeeInfo._fields}
+
+        if self.employee_information_id:
+            self.employee_information_id.sudo().write(vals)
+            emp = self.employee_information_id
+        else:
+            emp = EmployeeInfo.create(vals)
+            # Link back to applicant
+            self.employee_information_id = emp.id
 
         # Open created employee record
         return {
