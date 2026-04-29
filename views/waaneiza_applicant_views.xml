@@ -198,7 +198,7 @@
                             data-hotkey="x"
                             groups="waaneiza_recruitment.group_waaneiza_recruitment_manager"
                     />
-<!--                    <button string="Restore" name="toggle_active" type="object" invisible="active" data-hotkey="x"/>-->
+                    <!--                    <button string="Restore" name="toggle_active" type="object" invisible="active" data-hotkey="x"/>-->
 
                     <!-- Statusbar -->
                     <field name="stage_id"
@@ -212,7 +212,7 @@
                     <field name="active" invisible="1"/>
                     <field name="is_hired_stage" invisible="1"/>
                     <field name="is_passed_stage" invisible="1"/>
-                     <field name="is_sent_to_interviewer" invisible="1"/>
+                    <field name="is_sent_to_interviewer" invisible="1"/>
 
                     <widget name="web_ribbon" title="Refused"
                             bg_color="text-bg-warning"
@@ -258,7 +258,7 @@
                             <field name="interviewer_ids" widget="many2many_tags"/>
                             <field name="user_id"/>
                             <field name="priority" widget="priority"/>
-                            <field name="applied_date" />
+                            <field name="applied_date"/>
                         </group>
                     </group>
 
@@ -485,6 +485,14 @@
         <field name="search_view_id" ref="waaneiza_recruitment.view_waaneiza_applicant_search"/>
         <field name="context">{'search_default_stage': 1}</field>
     </record>
-
+    <record id="action_waaneiza_applicant_bulk_next_stage" model="ir.actions.server">
+        <field name="name">Move to Next Stage</field>
+        <field name="model_id" ref="model_waaneiza_applicant"/>
+        <field name="binding_model_id" ref="model_waaneiza_applicant"/>
+        <field name="binding_view_types">list</field>
+        <field name="groups_id" eval="[(4, ref('waaneiza_recruitment.group_waaneiza_recruitment_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">records.action_confirm_next_stage()</field>
+    </record>
 
 </odoo>
